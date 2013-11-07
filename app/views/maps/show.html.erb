@@ -1,3 +1,4 @@
+
 <head>
   <%= stylesheet_link_tag    "application", :media => "all" %>
   <%= javascript_include_tag "application" %>
@@ -119,9 +120,12 @@
 </head>
 <body>
   <div id="dialog">
-    <button>I'm interested</button>
-    <img src=''>
+  <script>
+  function java(){
+	  window.alert("Your message has been sent to the Home Owner!")
+  }
+  </script>
+  	<input type="button" value="I'm Interested" onClick="java()">
+   
+  
   </div>
-
-  <div id="map-canvas"/>
-</body>
