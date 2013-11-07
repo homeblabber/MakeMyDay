@@ -34,6 +34,14 @@
           var map = new google.maps.Map(document.getElementById("map-canvas"),
               mapOptions);
 
+          $.ajax({
+            url: '<%= listings_url %>',
+            type: 'GET',
+            success: function(res) {
+              interest_counts = res;
+            }
+          });
+
           var markers = [];
           var lat;
           var lng;
@@ -81,14 +89,32 @@
             });
 
             google.maps.event.addListener(marker, 'click', function(event) {
-              var select_listing = res.bundle.filter(function (mark, i) {
+              var select_listing = res.bundle.filter(function (mark) {
                 if(mark['Coordinates']) {
                   return mark['Coordinates']['Latitude'] === event.latLng.lat();
                 }
               })[0];
 
-              $('#dialog').dialog('option', 'title', select_listing['Address']);
+              var interest_count = interest_counts.filter(function (count) {
+                return count['listing_api_id'] === select_listing['_id']
+              })[0];
 
+              if(interest_count) {
+                $('#interest_count').html(interest_count['interest_count']);
+                if(interest_count['interest_count'] === 1) {
+                  $('#humans').html('person');
+                }
+                else {
+                  $('#humans').html('people');
+                }
+              }
+              else {
+                $('#interest_count').html('0');
+                $('#humans').html('people');
+              }
+
+              $('#dialog').dialog('option', 'data-id', select_listing['_id']);
+              $('#dialog').dialog('option', 'title', select_listing['Address']);
 
               if(select_listing['PhotoCount']) {
                 $('#dialog').find('img').attr('src',
@@ -99,8 +125,6 @@
               }
               
               $( "#dialog" ).dialog( "open" );
-              // console.log(event.latLng.lng());
-              // map.setCenter(marker.getPosition());
             });
 
             markers << marker;
@@ -118,14 +142,46 @@
   </script>
 </head>
 <body>
-  <div id="dialog">
-  <script>
-  function send_message(){
-	  
-	  alert('Your message has been sent to the Home Owner!');
-  }
-  </script>
-  	<input type="button" value="I'm Interested" onClick="send_message()">
+  <div id="dialog" data-id=''>
+    <script>
+      function send_message(){
+        $.ajax({
+          url: '<%= listings_url %>',
+          type: 'POST',
+          data: { 'listing_id': $('#dialog').dialog('option', 'data-id') },
+          success: function(res) {
+            var replace_index;
+
+            var interest_count = interest_counts.filter(function (count, i) {
+              if(count['listing_api_id'] === res['listing_api_id']) {
+                replace_index = i;
+              }
+              return count['listing_api_id'] === res['listing_api_id']
+            });
+
+            if(interest_count) {
+              interest_counts.splice(replace_index, 1, res)
+            }
+            else {
+              interest_counts << res;
+            }
+
+            $('#interest_count').html(res['interest_count']);
+            if(res['interest_count'] === 1) {
+              $('#humans').html('person');
+            }
+            else {
+              $('#humans').html('people');
+            }
+          }
+        });
+
+        alert('Your message has been sent to the Home Owner!');
+      }
+    </script>
+
+    <input type="button" value="I'm Interested" onClick="send_message()">
+    <span id='interest_count'></span> <span id='humans'></span> interested
     <img src=''>
   </div>
   
