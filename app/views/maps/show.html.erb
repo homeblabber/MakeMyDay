@@ -1,4 +1,3 @@
-
 <head>
   <%= stylesheet_link_tag    "application", :media => "all" %>
   <%= javascript_include_tag "application" %>
@@ -122,10 +121,11 @@
   <div id="dialog">
   <script>
   function java(){
-	  window.alert("Your message has been sent to the Home Owner!")
+	  
+	  alert();
   }
   </script>
-  	<input type="button" value="I'm Interested" onClick="java()">
+  	<input type="button" value="I'm Interested" onClick="java('Your message has been sent to the Home Owner!');>
    
   
   </div>
